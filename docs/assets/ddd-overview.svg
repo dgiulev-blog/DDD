@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+<title id="title">DDD — Keep unfinished work in sight</title>
+<desc id="desc">Concept illustration of a floating D connecting to numbered follow-ups. Not an application screenshot.</desc>
+<defs><radialGradient id="bg"><stop stop-color="#292047"/><stop offset="1" stop-color="#101018"/></radialGradient></defs>
+<rect width="1280" height="640" rx="24" fill="url(#bg)"/>
+<g font-family="-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif">
+<text x="72" y="98" font-size="22" letter-spacing="5" fill="#b8a0ff">DDD / MACOS</text>
+<text x="72" y="198" font-size="56" font-weight="700" fill="#fff">Keep unfinished</text>
+<text x="72" y="265" font-size="56" font-weight="700" fill="#fff">work in sight.</text>
+<text x="76" y="330" font-size="23" fill="#c6c2d4">Switch windows. Mark a follow-up.</text>
+<text x="76" y="366" font-size="23" fill="#c6c2d4">Find your way back.</text>
+<rect x="76" y="421" width="314" height="53" rx="26" fill="#6847ed"/>
+<text x="103" y="455" font-size="20" font-weight="600" fill="#fff">Native Swift · Local-first · MIT</text>
+<g fill="none" stroke="#9272ff" stroke-width="2">
+<path d="M795 305 L1000 174 M795 305 L1064 328 M795 305 L964 476"/>
+<circle cx="1000" cy="174" r="12"/><circle cx="1064" cy="328" r="12"/>
+</g>
+<path d="M795 305 L964 476" stroke="#27d46b" stroke-width="2"/>
+<circle cx="964" cy="476" r="12" stroke="#27d46b" stroke-width="2" fill="#15151e"/>
+<circle cx="795" cy="305" r="60" fill="#211a35" stroke="#7957ff"/>
+<text x="755" y="342" font-size="102" font-weight="900" fill="#fff" stroke="#9272ff" stroke-width="2">D</text>
+<g fill="#e84766"><circle cx="841" cy="258" r="19"/><circle cx="1000" cy="129" r="17"/><circle cx="1064" cy="283" r="17"/><circle cx="964" cy="431" r="17"/></g>
+<g fill="#fff" font-size="19" font-weight="700" text-anchor="middle"><text x="841" y="265">3</text><text x="1000" y="136">1</text><text x="1064" y="290">2</text><text x="964" y="438">3</text></g>
+<g fill="#ddd7ed" font-size="19" text-anchor="middle"><text x="1000" y="214">A browser page</text><text x="1064" y="369">A conversation</text><text x="964" y="517">A window to revisit</text></g>
+<text x="76" y="577" font-size="18" fill="#a49bb8">github.com/dgiulev-blog/DDD</text>
+<text x="1204" y="590" text-anchor="end" font-size="13" fill="#8f889f">Concept illustration · Not a screenshot</text>
+</g></svg>

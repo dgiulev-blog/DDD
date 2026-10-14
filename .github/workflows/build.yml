@@ -1,0 +1,21 @@
+name: Build and validate
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build universal app and archive
+        run: ./scripts/package.sh
+      - name: Core behavior checks
+        run: ./scripts/test.sh
+      - name: Run checks
+        run: python3 scripts/check_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DDD-macos-universal
+          path: dist/*
