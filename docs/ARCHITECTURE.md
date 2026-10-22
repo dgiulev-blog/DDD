@@ -1,6 +1,6 @@
 # Architecture
 
-DDD v0.1.1 is a native Swift/AppKit accessory application. `Sources/main.swift` creates `NSApplication`, installs `AppDelegate`, selects `.accessory` activation policy, and runs the application loop. It is not a browser extension or a hosted service.
+DDD v0.1.2 is a native Swift/AppKit accessory application. `Sources/main.swift` creates `NSApplication`, installs `AppDelegate`, selects `.accessory` activation policy, and runs the application loop. It is not a browser extension or a hosted service.
 
 ## Source map
 
@@ -60,7 +60,7 @@ Green state is inferred at the **app level** from Dock badge text or dialog/shee
 ## Distribution and constraints
 
 - Target: macOS 14+. Build: `./build.sh`; universal: `ARCHS='arm64 x86_64' ./build.sh`; packaging: `./scripts/package.sh`.
-- Universal archive: `dist/DDD-0.1.1-macos-universal.zip`, accompanied by `dist/SHA256SUMS.txt`. Automated core and native UI-construction checks ran on Apple Silicon. Intel runtime behavior and end-to-end permission flows are not release-validated.
+- Universal archive: `dist/DDD-0.1.2-macos-universal.zip`, accompanied by `dist/SHA256SUMS.txt`. Automated core and native UI-construction checks ran on Apple Silicon. Intel runtime behavior and end-to-end permission flows are not release-validated.
 - Releases are ad-hoc signed, without a valid Developer ID signature, and not notarized.
 - `WindowEntry.windowID` binds private **`_AXUIElementGetWindow` SPI** via `@_silgen_name`. This is not a public API contract; OS updates may break it. The current app is not App Store-ready.
 - Accessibility trees, Dock structures, titles, deep links, and external apps can change. Bounds/timeouts reduce some AX work but do not guarantee responsiveness or correct matching.

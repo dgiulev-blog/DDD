@@ -5,7 +5,7 @@ https://github.com/dgiulev-blog/DDD.
 
 ## Current distribution status
 
-Version 0.1.1 is an **experimental, ad-hoc-signed, unnotarized** release.
+Version 0.1.2 is an **experimental, ad-hoc-signed, unnotarized** release.
 The universal executable contains Apple Silicon (`arm64`) and Intel (`x86_64`)
 slices targeting macOS 14.0+. Cross-compilation does not constitute runtime
 validation on every supported system.
@@ -26,7 +26,7 @@ python3 scripts/check_release.py
 
 Outputs:
 - `build/DDD.app`
-- `dist/DDD-0.1.1-macos-universal.zip` (version comes from `VERSION`)
+- `dist/DDD-0.1.2-macos-universal.zip` (version comes from `VERSION`)
 - `dist/SHA256SUMS.txt`
 
 The build script builds only. It never replaces `/Applications/DDD.app`,
@@ -73,7 +73,7 @@ runtime and timestamped signing instead of ad-hoc signing. A real distribution
 process must then notarize the ZIP using `xcrun notarytool`, inspect Apple's
 result, staple the accepted ticket to the app, re-create the ZIP, and regenerate
 the checksums. Only claim notarization after Apple's successful response and
-local Gatekeeper verification. This workflow has **not** been exercised for 0.1.1
+local Gatekeeper verification. This workflow has **not** been exercised for 0.1.2
 because no valid distribution identity is available on the build host.
 
 Do not instruct users to disable Gatekeeper system-wide. A future signed and

@@ -49,6 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.closeOverlay()
             FollowUpOpener.open(item)
         }
+        jobsHover.onRemove = { item in FollowUpStore.shared.remove(item) }
         dPanel.dView.onMoved = { [weak self] origin in
             self?.defaults.set(NSStringFromPoint(origin), forKey: "dOrigin")
         }

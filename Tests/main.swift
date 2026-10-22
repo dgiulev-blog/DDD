@@ -54,6 +54,19 @@ var openedID: UUID?
 jobList.onOpen = { openedID = $0.id }
 jobList.buttons.last?.performClick(nil)
 expect(openedID == jobs.last?.id, "Clicking hover row opens the correct job")
+var removedID: UUID?
+jobList.onRemove = { removedID = $0.id }
+let firstBox = jobList.buttons.first!
+expect(firstBox is JobBoxButton, "Every hover job has its own box control")
+let rightClick = NSEvent.mouseEvent(with: .rightMouseUp,
+    location: firstBox.convert(NSPoint(x: firstBox.bounds.midX, y: firstBox.bounds.midY), to: nil),
+    modifierFlags: [], timestamp: 0, windowNumber: 0, context: nil, eventNumber: 0, clickCount: 1, pressure: 0)!
+openedID = nil
+firstBox.rightMouseUp(with: rightClick)
+expect(removedID == jobs.first?.id, "Right-click removes only the selected linked job")
+expect(openedID == nil, "Right-click never opens the job or activates its app")
+let rebuilt = JobsListView(items: Array(jobs.dropFirst()), width: 420, maxHeight: 350)
+expect(rebuilt.buttons.count == 59 && rebuilt.buttons.first?.title == "1. Example\nJob 2", "Removal refresh closes numbering gaps")
 let emptyList = JobsListView(items: [], width: 420, maxHeight: 350)
 expect(emptyList.buttons.isEmpty && emptyList.heading.stringValue == "No linked jobs", "Empty hover state is explicit")
 var hoverEvents: [Bool] = []

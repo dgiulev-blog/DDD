@@ -1,11 +1,12 @@
 import AppKit
 
-/// Read-only overview of every saved follow-up; unlike the radial picker it never truncates.
+/// Overview of every saved follow-up; unlike the radial picker it never truncates.
 final class JobsListView: NSView {
     let heading = NSTextField(labelWithString: "")
     let scrollView = NSScrollView()
     private(set) var buttons: [NSButton] = []
     var onOpen: ((FollowUp) -> Void)?
+    var onRemove: ((FollowUp) -> Void)?
     var onHoverChanged: ((Bool) -> Void)?
     private let items: [FollowUp]
 
@@ -13,7 +14,7 @@ final class JobsListView: NSView {
 
     init(items: [FollowUp], width: CGFloat, maxHeight: CGFloat) {
         self.items = items
-        let rowHeight: CGFloat = 54
+        let rowHeight: CGFloat = 62
         let headerHeight: CGFloat = 44
         let height = min(maxHeight, headerHeight + max(42, CGFloat(items.count) * rowHeight) + 10)
         super.init(frame: NSRect(x: 0, y: 0, width: width, height: height))
@@ -29,7 +30,8 @@ final class JobsListView: NSView {
         let document = FlippedJobsDocument(frame: NSRect(x: 0, y: 0, width: width - 32,
                                                          height: max(42, CGFloat(items.count) * rowHeight)))
         for (index, item) in items.enumerated() {
-            let button = NSButton(title: "\(index + 1). \(item.appName)\n\(item.label)", target: nil, action: #selector(openJob(_:)))
+            let button = JobBoxButton(title: "\(index + 1). \(item.appName)\n\(item.label)", target: nil, action: #selector(openJob(_:)))
+            button.onRightClick = { [weak self] in self?.onRemove?(item) }
             button.target = self
             button.tag = index
             button.isBordered = false
@@ -37,8 +39,8 @@ final class JobsListView: NSView {
             button.font = .systemFont(ofSize: 13)
             button.cell?.wraps = true
             button.cell?.lineBreakMode = .byTruncatingTail
-            button.frame = NSRect(x: 6, y: CGFloat(index) * rowHeight, width: width - 48, height: rowHeight - 4)
-            button.toolTip = "\(index + 1). \(item.appName) — \(item.label)"
+            button.frame = NSRect(x: 6, y: CGFloat(index) * rowHeight, width: width - 48, height: rowHeight - 8)
+            button.toolTip = "\(index + 1). \(item.appName) — \(item.label)\nClick to open · Right-click to remove link"
             document.addSubview(button)
             buttons.append(button)
         }
@@ -70,6 +72,48 @@ final class JobsListView: NSView {
     }
 }
 
+/// A distinct rounded job box with independent open and dismiss gestures.
+final class JobBoxButton: NSButton {
+    var onRightClick: (() -> Void)?
+    private var hovered = false { didSet { needsDisplay = true } }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                                       owner: self, userInfo: nil))
+    }
+    override func mouseEntered(with event: NSEvent) { hovered = true }
+    override func mouseExited(with event: NSEvent) { hovered = false }
+    override func rightMouseDown(with event: NSEvent) {} // Do not open a contextual menu.
+    override func rightMouseUp(with event: NSEvent) {
+        guard bounds.contains(convert(event.locationInWindow, from: nil)) else { return }
+        onRightClick?()
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let box = NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: 9, yRadius: 9)
+        (hovered ? NSColor.controlAccentColor.withAlphaComponent(0.18) : NSColor.controlBackgroundColor).setFill()
+        box.fill()
+        (hovered ? NSColor.controlAccentColor : NSColor.separatorColor).setStroke()
+        box.lineWidth = 1
+        box.stroke()
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineBreakMode = .byTruncatingTail
+        let text = NSMutableAttributedString(string: title, attributes: [
+            .font: NSFont.systemFont(ofSize: 13), .foregroundColor: NSColor.labelColor, .paragraphStyle: paragraph,
+        ])
+        let firstLine = (title as NSString).range(of: "\n")
+        if firstLine.location != NSNotFound {
+            text.addAttribute(.font, value: NSFont.systemFont(ofSize: 13, weight: .semibold),
+                              range: NSRange(location: 0, length: firstLine.location))
+        }
+        text.draw(with: bounds.insetBy(dx: 12, dy: 9), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine])
+    }
+}
+
 private final class FlippedJobsDocument: NSView {
     override var isFlipped: Bool { true }
 }
@@ -81,6 +125,7 @@ final class JobsHoverController {
     private var items: [FollowUp] = []
     private var pending: DispatchWorkItem?
     var onOpen: ((FollowUp) -> Void)?
+    var onRemove: ((FollowUp) -> Void)?
 
     var isVisible: Bool { panel?.isVisible == true }
 
@@ -134,6 +179,7 @@ final class JobsHoverController {
             self.close()
             self.onOpen?(item)
         }
+        content.onRemove = { [weak self] item in self?.onRemove?(item) }
         content.onHoverChanged = { [weak self] inside in
             if inside { self?.pending?.cancel() } else { self?.scheduleDismiss() }
         }

@@ -1,10 +1,10 @@
 # DDD user guide
 
-DDD v0.1.1 is experimental. It requires macOS 14 or later. A universal arm64 + x86_64 download is provided. Automated core and native UI-construction checks ran on Apple Silicon; Intel runtime behavior and end-to-end permission flows are not release-validated.
+DDD v0.1.2 is experimental. It requires macOS 14 or later. A universal arm64 + x86_64 download is provided. Automated core and native UI-construction checks ran on Apple Silicon; Intel runtime behavior and end-to-end permission flows are not release-validated.
 
 ## Install or update
 
-1. Get an available ZIP and `SHA256SUMS.txt` from [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases). Choose the v0.1.1 experimental release and read its notes before installing.
+1. Get an available ZIP and `SHA256SUMS.txt` from [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases). Choose the v0.1.2 experimental release and read its notes before installing.
 2. Verify the ZIP before opening it (below).
 3. If updating, right-click DDD's **menu bar icon** and select **Quit DDD**. Do not replace a running copy.
 4. Expand the ZIP in Finder. Drag `DDD.app` into **Applications**, replacing the old copy if appropriate.
@@ -37,7 +37,7 @@ ARCHS='arm64 x86_64' ./build.sh
 ./scripts/package.sh
 ```
 
-Packaging produces `dist/DDD-0.1.1-macos-universal.zip` and `dist/SHA256SUMS.txt`. Install the packaged app manually as above.
+Packaging produces `dist/DDD-0.1.2-macos-universal.zip` and `dist/SHA256SUMS.txt`. Install the packaged app manually as above.
 
 ## First-launch permissions and settings
 
@@ -91,7 +91,7 @@ There is no exact session snapshot, reliable scroll-position restore, or automat
 
 ### Hover list of all linked jobs
 
-Rest the pointer over D for about 0.3 seconds. A non-activating list shows every saved follow-up in number order, with its app name and job label. Long lists scroll rather than truncating. This includes saved follow-ups without a currently visible line. Move into the list to click a job; move away to dismiss it. Clicking or dragging D closes the hover list and keeps the existing picker/drag behavior. An empty list says “No linked jobs.”
+Rest the pointer over D for about 0.3 seconds. A non-activating list shows every saved follow-up in number order, with its app name and job label. Long lists scroll rather than truncating. This includes saved follow-ups without a currently visible line. Each job is a separate rounded box. Left-click a box to reopen it; right-click to remove only that saved follow-up and its link, without closing the underlying app/window. Remaining jobs renumber immediately. Move into the list to use the boxes; move away to dismiss it. Clicking or dragging D closes the hover list and keeps the existing picker/drag behavior. An empty list says “No linked jobs.”
 
 ### Lines and colors
 

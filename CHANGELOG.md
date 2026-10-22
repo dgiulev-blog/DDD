@@ -2,6 +2,13 @@
 
 This records the initial public version's implemented behavior and limitations. Release dates and asset availability are defined by [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases), not implied by this entry.
 
+## v0.1.2 — Separate clickable job boxes
+
+- Each hover-list job is a separate rounded box with padded text and hover highlighting.
+- Left-click opens the job. Right-click removes its follow-up/link without quitting the app or closing its window.
+- Removal refreshes the list, total, badges, links, and contiguous numbering through the existing store notification.
+- Added regression checks for box controls, right-click targeting, no accidental open, and renumbering.
+
 ## v0.1.1 — All linked jobs on hover
 
 - Hover over D to see every saved follow-up, numbered with its app name and label.
