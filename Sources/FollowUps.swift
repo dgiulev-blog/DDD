@@ -12,11 +12,16 @@ struct FollowUp: Codable {
     let url: String?
     /// Selected item (e.g. chat name) for native apps without a URL.
     let selection: String?
+    var orcaContext: OrcaContext? = nil
     var created = Date()
 
     /// Same place = same app and same URL, or same window title + selected item.
     func samePlace(as o: FollowUp) -> Bool {
         guard bundleID == o.bundleID else { return false }
+        if orcaContext != nil || o.orcaContext != nil {
+            guard let a = orcaContext, let b = o.orcaContext else { return false }
+            return a.workspaceID == b.workspaceID
+        }
         if let url, let other = o.url { return url == other }
         return windowTitle == o.windowTitle && selection == o.selection
     }
@@ -89,15 +94,20 @@ enum FollowUpCapture {
         AXUIElementGetPid(hit, &pid)
         guard pid != getpid(), let app = NSRunningApplication(processIdentifier: pid),
               let window = window(of: hit) else { return nil }
-        return describe(window: window, of: app)
+        return describe(window: window, of: app, hit: hit)
     }
 
-    static func describe(window: AXUIElement, of app: NSRunningApplication) -> FollowUp? {
+    static func describe(window: AXUIElement, of app: NSRunningApplication, hit: AXUIElement? = nil) -> FollowUp? {
         guard let bundleID = app.bundleIdentifier else { return nil }
         enableWebAccessibility(for: app)
 
         let appName = clean(app.localizedName ?? "App")
         let windowTitle = clean(WindowService.attribute(window, kAXTitleAttribute) as? String ?? "")
+        if bundleID == OrcaNavigation.bundleID {
+            guard let context = OrcaNavigation.context(window: window, app: app, hit: hit) else { return nil }
+            return FollowUp(bundleID: bundleID, appName: appName, label: context.label, windowTitle: windowTitle,
+                            url: nil, selection: nil, orcaContext: context)
+        }
         let isSlack = bundleID == "com.tinyspeck.slackmacgap"
         let scan = scanWindow(window, findSlackChannel: isSlack)
         var url = (WindowService.attribute(window, kAXDocumentAttribute) as? String).flatMap { $0.hasPrefix("http") ? $0 : nil }
@@ -204,6 +214,10 @@ func walk(_ root: AXUIElement, maxNodes: Int, maxDepth: Int = 40, visit: (AXUIEl
 
 enum FollowUpOpener {
     static func open(_ f: FollowUp, launchIfNeeded: Bool = true) {
+        if f.bundleID == OrcaNavigation.bundleID, let context = f.orcaContext {
+            OrcaNavigation.open(context)
+            return
+        }
         let deep = deepLink(f)
         let isBrowser = BrowserTheme.browserIDs.contains(f.bundleID)
         guard let running = NSRunningApplication.runningApplications(withBundleIdentifier: f.bundleID).first else {

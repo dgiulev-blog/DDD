@@ -1,10 +1,10 @@
 # DDD user guide
 
-DDD v0.1.2 is experimental. It requires macOS 14 or later. A universal arm64 + x86_64 download is provided. Automated core and native UI-construction checks ran on Apple Silicon; Intel runtime behavior and end-to-end permission flows are not release-validated.
+DDD v0.1.3 is experimental. It requires macOS 14 or later. A universal arm64 + x86_64 download is provided. Automated core and native UI-construction checks ran on Apple Silicon; Intel runtime behavior and end-to-end permission flows are not release-validated.
 
 ## Install or update
 
-1. Get an available ZIP and `SHA256SUMS.txt` from [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases). Choose the v0.1.2 experimental release and read its notes before installing.
+1. Get an available ZIP and `SHA256SUMS.txt` from [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases). Choose the v0.1.3 experimental release and read its notes before installing.
 2. Verify the ZIP before opening it (below).
 3. If updating, right-click DDD's **menu bar icon** and select **Quit DDD**. Do not replace a running copy.
 4. Expand the ZIP in Finder. Drag `DDD.app` into **Applications**, replacing the old copy if appropriate.
@@ -37,7 +37,7 @@ ARCHS='arm64 x86_64' ./build.sh
 ./scripts/package.sh
 ```
 
-Packaging produces `dist/DDD-0.1.2-macos-universal.zip` and `dist/SHA256SUMS.txt`. Install the packaged app manually as above.
+Packaging produces `dist/DDD-0.1.3-macos-universal.zip` and `dist/SHA256SUMS.txt`. Install the packaged app manually as above.
 
 ## First-launch permissions and settings
 
@@ -88,6 +88,14 @@ Follow-ups retain creation order. Their displayed numbers are positions, not sta
 DDD reads accessibility information to capture a URL, window title, label, or selected item when an app exposes it. Browser tabs are matched by title prefixes; if a match is missing, opening the saved URL can create a new tab. Selected native-app items are matched by text. Some supported app URLs can become deep links, including Slack, Claude, and Notion; some Messages titles can become `imessage://` links. These are implementation heuristics, not a compatibility guarantee.
 
 There is no exact session snapshot, reliable scroll-position restore, or automatic completion tracking. Changed titles, duplicate names, unavailable accessibility trees, signed-out apps, and changed URL handlers can return to the wrong place or fail. DDD may activate an app or its first available window as a fallback.
+
+### Orca projects and workspaces
+
+Middle-click inside an open Orca workspace to save a project-specific job. Its label includes the project/workspace, and reopening navigates to that saved workspace instead of simply activating Orca. Middle-clicking the same workspace again removes only that job. You may also middle-click a workspace row in Orca's sidebar to identify that row directly.
+
+DDD matches visible Orca tab headers to Orca's published workspace catalog. It does **not** infer the selected project from the caller's working directory, a generic window title, or an arbitrary terminal. Identical/ambiguous tab titles may prevent capture: mark the specific workspace row instead. Reopening requires the saved workspace to have an available published tab; open it in Orca first if it is closed, unavailable, or disconnected. DDD does not submit terminal input, create agents, or deliberately create terminals to navigate.
+
+This version uses the installed Orca application's internal local runtime client and may need adaptation after Orca updates. It has been round-trip checked with two local workspaces and a remote terminal-backed project in Orca 1.4.237; other surfaces and versions are not fully validated. Existing generic Orca jobs have no recoverable project identity: remove and re-mark those rather than assuming they were upgraded.
 
 ### Hover list of all linked jobs
 

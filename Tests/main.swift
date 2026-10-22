@@ -1,4 +1,5 @@
 import AppKit
+import ApplicationServices
 
 func expect(_ condition: @autoclosure () -> Bool, _ description: String) {
     guard condition() else { fatalError("FAIL: \(description)") }
@@ -104,4 +105,61 @@ if CommandLine.arguments.contains("--preview") {
     window.orderOut(nil)
 }
 panel.orderOut(nil)
+let orcaA = OrcaContext(workspaceID: "repo-a::/projects/alpha", sidebarID: nil, label: "Alpha › main")
+let orcaB = OrcaContext(workspaceID: "repo-b::/projects/beta", sidebarID: nil, label: "Beta › main")
+let markedA = FollowUp(bundleID: OrcaNavigation.bundleID, appName: "Orca", label: orcaA.label,
+                       windowTitle: "Orca", url: nil, selection: nil, orcaContext: orcaA)
+let markedB = FollowUp(bundleID: OrcaNavigation.bundleID, appName: "Orca", label: orcaB.label,
+                       windowTitle: "Orca", url: nil, selection: nil, orcaContext: orcaB)
+expect(!markedA.samePlace(as: markedB), "Two Orca projects remain distinct despite identical window titles")
+expect(markedA.samePlace(as: markedA), "Recapturing the same Orca workspace toggles its own job")
+var renamedA = markedA
+renamedA.orcaContext = OrcaContext(workspaceID: orcaA.workspaceID, sidebarID: "different-sidebar-layout", label: "Renamed Alpha")
+expect(markedA.samePlace(as: renamedA), "Orca workspace identity survives label/sidebar changes")
+expect(OrcaNavigation.rowWorkspace("worktree-list-option-project%3Aexample%3Alocal%7Crepo-a%3A%3A%2Fprojects%2Falpha") == orcaA.workspaceID,
+       "Sidebar row capture uses its exact workspace identifier")
+expect(!markedA.samePlace(as: followUp(OrcaNavigation.bundleID, title: "Orca")), "Legacy generic Orca jobs are not guessed or merged")
+let markedRoundTrip = try JSONDecoder().decode(FollowUp.self, from: JSONEncoder().encode(markedA))
+expect(markedRoundTrip.orcaContext?.workspaceID == orcaA.workspaceID, "Orca target survives JSON persistence")
+expect(decoded.orcaContext == nil, "Older follow-up records decode without Orca metadata")
+expect(OrcaNavigation.normalizedTabTitle("Working Hermes Close tab ⠼ Hermes") == "Hermes", "Live Orca tab status is normalized")
+let catalogs = [OrcaWorkspaceSnapshot(workspaceID: orcaA.workspaceID, titles: ["Hermes"]),
+                OrcaWorkspaceSnapshot(workspaceID: orcaB.workspaceID, titles: ["Terminal 1"])]
+expect(OrcaNavigation.matchWorkspace(visibleTitles: ["Working Hermes Close tab ⠼ Hermes"], snapshots: catalogs) == orcaA.workspaceID,
+       "Orca capture follows the visible UI tab, not caller cwd")
+expect(OrcaNavigation.matchWorkspace(visibleTitles: ["Terminal 1"], snapshots: catalogs) == orcaB.workspaceID,
+       "Switching visible workspace changes the captured target")
+expect(OrcaNavigation.matchWorkspace(visibleTitles: ["Hermes"], snapshots: catalogs + [catalogs[0]]) == nil,
+       "Ambiguous Orca captures are rejected rather than opening a wrong project")
+if CommandLine.arguments.contains("--orca-live") {
+    guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: OrcaNavigation.bundleID).first,
+          let window = WindowService.windows(of: AppEntry(running: app)).first,
+          let captured = FollowUpCapture.describe(window: window.element, of: app),
+          let original = captured.orcaContext else { fatalError("Live Orca workspace capture failed") }
+    print("LIVE captured visible Orca context:", original.label)
+    if let secondID = ProcessInfo.processInfo.environment["DDD_ORCA_TEST_WORKSPACE"] {
+        func roundTrip() {
+            defer { _ = OrcaNavigation.activate(original, appURL: app.bundleURL) }
+            let second = OrcaContext(workspaceID: secondID, sidebarID: nil, label: "Live test target")
+            expect(OrcaNavigation.activate(second, appURL: app.bundleURL), "LIVE request workspace B navigation")
+            Thread.sleep(forTimeInterval: 0.7)
+            let b = FollowUpCapture.describe(window: window.element, of: app)
+            print("LIVE B capture:", b?.orcaContext?.label ?? "nil")
+            fflush(stdout)
+            expect(b?.orcaContext?.workspaceID == secondID, "LIVE visible Orca UI is workspace B")
+            expect(!captured.samePlace(as: b!), "LIVE A and B produce distinct saved jobs")
+            FollowUpOpener.open(captured)
+            RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+            let restored = FollowUpCapture.describe(window: window.element, of: app)
+            expect(restored?.orcaContext?.workspaceID == original.workspaceID, "LIVE DDD opener returns to saved workspace A")
+            expect(captured.samePlace(as: restored!), "LIVE recapture of A toggles only A, not B")
+            FollowUpOpener.open(b!)
+            RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+            let reopenedB = FollowUpCapture.describe(window: window.element, of: app)
+            expect(reopenedB?.orcaContext?.workspaceID == secondID, "LIVE DDD opener also returns to saved workspace B")
+            print("LIVE round trip passed; user's job file was not accessed")
+        }
+        roundTrip()
+    }
+}
 print("All core and native UI construction checks passed. No DDD preferences or follow-up store accessed.")

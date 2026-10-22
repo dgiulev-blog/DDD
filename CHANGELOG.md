@@ -2,6 +2,15 @@
 
 This records the initial public version's implemented behavior and limitations. Release dates and asset availability are defined by [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases), not implied by this entry.
 
+## v0.1.3 — Orca project/workspace targets
+
+- Capture Orca's specific project/workspace and include it in the job label.
+- Resolve the visible UI against Orca's workspace/tab catalog; capture explicit sidebar workspace rows by identifier.
+- Reopen the saved workspace through an existing Orca tab/terminal rather than generic app activation.
+- Keep two Orca workspaces distinct; preserve legacy records without inventing missing project metadata.
+- Move capture/integration work off the main UI thread and bound local runtime requests.
+- Live round-trip checks cover two local workspaces and a remote terminal-backed project on Orca 1.4.237. Ambiguous titles and unavailable/empty workspace tabs remain limitations.
+
 ## v0.1.2 — Separate clickable job boxes
 
 - Each hover-list job is a separate rounded box with padded text and hover highlighting.

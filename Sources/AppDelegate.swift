@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let middleClick = MiddleClickMonitor()
     private let links = LinksOverlay()
     private let jobsHover = JobsHoverController()
+    private let captureQueue = DispatchQueue(label: "io.prim.ddd.capture", qos: .userInitiated)
 
     private var isOn: Bool {
         get { defaults.object(forKey: "isOn") as? Bool ?? true }
@@ -93,14 +94,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func markFollowUp(at point: CGPoint) {
-        guard let f = FollowUpCapture.capture(at: point) else {
-            Toast.show("Can't remember this spot", near: point)
-            return
+        captureQueue.async {
+            let captured = FollowUpCapture.capture(at: point)
+            DispatchQueue.main.async {
+                guard let f = captured else {
+                    Toast.show("Can't identify this spot — try the workspace row in Orca", near: point)
+                    return
+                }
+                let result = FollowUpStore.shared.toggle(f)
+                let total = FollowUpStore.shared.items.count
+                Toast.show(result.added ? "\(result.number)  ·  \(f.label)"
+                                        : "✓ \(f.label) — done, \(total) left", near: point)
+            }
         }
-        let result = FollowUpStore.shared.toggle(f)
-        let total = FollowUpStore.shared.items.count
-        Toast.show(result.added ? "\(result.number)  ·  \(f.label)"
-                                : "✓ \(f.label) — done, \(total) left", near: point)
     }
 
     @objc private func followUpsChanged() {

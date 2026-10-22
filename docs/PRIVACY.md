@@ -25,6 +25,12 @@ Removal updates the active JSON list; there is no secure-erasure guarantee for f
 
 The code logs operational messages such as mouse-monitor startup and app selection with window counts through `NSLog`. These are not a remote analytics system, but local diagnostics may contain app names. Review diagnostics before sharing them.
 
+## Orca context integration
+
+For Orca jobs, DDD additionally saves an optional workspace identifier, sidebar row identifier, and project/workspace label in the same plaintext follow-up file. These identifiers may include filesystem paths or project names. Old records without these fields still load.
+
+To distinguish Orca workspaces, DDD reads visible Accessibility tab headers and a filtered workspace/tab-title catalog through the installed Orca app's own local runtime client. To reopen one, it requests focus of an existing terminal or tab in the saved workspace. This uses Orca's authenticated local transport internally; DDD does not store or print its runtime credentials, pairing codes, or terminal content. It does not query third-party servers itself for this feature, although Orca may contact a remote host while switching a remote workspace.
+
 ## Network and other-app boundaries
 
 DDD has **no bundled user data, analytics, or cloud backend**. The inspected Swift source has no DDD HTTP service client or telemetry uploader. This does not mean that using it can never cause network traffic:
