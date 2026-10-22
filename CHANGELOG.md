@@ -2,6 +2,14 @@
 
 This records the initial public version's implemented behavior and limitations. Release dates and asset availability are defined by [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases), not implied by this entry.
 
+## v0.1.1 — All linked jobs on hover
+
+- Hover over D to see every saved follow-up, numbered with its app name and label.
+- Long lists scroll without the radial picker's two-column truncation. Click a row to reopen it.
+- Short opening/dismissal delays allow moving into the list; the panel does not activate DDD.
+- Hide, drag, or click D to dismiss the hover list. Empty lists show “No linked jobs.”
+- Added regression checks for 60 jobs, ordering, row actions, empty state, pointer tracking, delayed opening, and cancellation.
+
 ## v0.1.0 — Experimental initial public version
 
 ### Features

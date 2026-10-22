@@ -24,6 +24,17 @@ final class DView: NSView {
     var onClick: (() -> Void)?
     var onDragBegan: (() -> Void)?
     var onMoved: ((NSPoint) -> Void)?
+    var onHoverChanged: ((Bool) -> Void)?
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                                       owner: self, userInfo: nil))
+    }
+
+    override func mouseEntered(with event: NSEvent) { onHoverChanged?(true) }
+    override func mouseExited(with event: NSEvent) { onHoverChanged?(false) }
 
     private var downPoint = NSPoint.zero
     private var startOrigin = NSPoint.zero

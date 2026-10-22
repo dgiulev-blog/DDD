@@ -1,6 +1,6 @@
 # Architecture
 
-DDD v0.1.0 is a native Swift/AppKit accessory application. `Sources/main.swift` creates `NSApplication`, installs `AppDelegate`, selects `.accessory` activation policy, and runs the application loop. It is not a browser extension or a hosted service.
+DDD v0.1.1 is a native Swift/AppKit accessory application. `Sources/main.swift` creates `NSApplication`, installs `AppDelegate`, selects `.accessory` activation policy, and runs the application loop. It is not a browser extension or a hosted service.
 
 ## Source map
 
@@ -8,7 +8,8 @@ DDD v0.1.0 is a native Swift/AppKit accessory application. `Sources/main.swift` 
 | --- | --- |
 | `main.swift` | AppKit entry point |
 | `AppDelegate.swift` | Single-instance guard, menu bar, preferences, login item, permission prompts, picker lifecycle, capture wiring |
-| `DPanel.swift` | Draggable floating D, count badge, saved position callback |
+| `DPanel.swift` | Draggable floating D, count badge, saved position callback, pointer tracking |
+| `JobsHover.swift` | Delayed non-activating hover panel with all numbered jobs in a scroll view; click-to-reopen |
 | `RadialView.swift` | Animated app bubbles, window/follow-up/machine pills, actions and layout |
 | `WindowService.swift` | App grouping, AX window enumeration, focus/restore/close, window IDs |
 | `MiddleClick.swift` | System-wide middle-button event tap and capture-result toast |
@@ -59,7 +60,7 @@ Green state is inferred at the **app level** from Dock badge text or dialog/shee
 ## Distribution and constraints
 
 - Target: macOS 14+. Build: `./build.sh`; universal: `ARCHS='arm64 x86_64' ./build.sh`; packaging: `./scripts/package.sh`.
-- Universal archive: `dist/DDD-0.1.0-macos-universal.zip`, accompanied by `dist/SHA256SUMS.txt`. Automated core and native UI-construction checks ran on Apple Silicon. Intel runtime behavior and end-to-end permission flows are not release-validated.
+- Universal archive: `dist/DDD-0.1.1-macos-universal.zip`, accompanied by `dist/SHA256SUMS.txt`. Automated core and native UI-construction checks ran on Apple Silicon. Intel runtime behavior and end-to-end permission flows are not release-validated.
 - Releases are ad-hoc signed, without a valid Developer ID signature, and not notarized.
 - `WindowEntry.windowID` binds private **`_AXUIElementGetWindow` SPI** via `@_silgen_name`. This is not a public API contract; OS updates may break it. The current app is not App Store-ready.
 - Accessibility trees, Dock structures, titles, deep links, and external apps can change. Bounds/timeouts reduce some AX work but do not guarantee responsiveness or correct matching.

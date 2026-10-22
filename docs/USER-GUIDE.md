@@ -1,10 +1,10 @@
 # DDD user guide
 
-DDD v0.1.0 is experimental. It requires macOS 14 or later. A universal arm64 + x86_64 download is provided. Automated core and native UI-construction checks ran on Apple Silicon; Intel runtime behavior and end-to-end permission flows are not release-validated.
+DDD v0.1.1 is experimental. It requires macOS 14 or later. A universal arm64 + x86_64 download is provided. Automated core and native UI-construction checks ran on Apple Silicon; Intel runtime behavior and end-to-end permission flows are not release-validated.
 
 ## Install or update
 
-1. Get an available ZIP and `SHA256SUMS.txt` from [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases). Choose the v0.1.0 experimental release and read its notes before installing.
+1. Get an available ZIP and `SHA256SUMS.txt` from [GitHub Releases](https://github.com/dgiulev-blog/DDD/releases). Choose the v0.1.1 experimental release and read its notes before installing.
 2. Verify the ZIP before opening it (below).
 3. If updating, right-click DDD's **menu bar icon** and select **Quit DDD**. Do not replace a running copy.
 4. Expand the ZIP in Finder. Drag `DDD.app` into **Applications**, replacing the old copy if appropriate.
@@ -37,7 +37,7 @@ ARCHS='arm64 x86_64' ./build.sh
 ./scripts/package.sh
 ```
 
-Packaging produces `dist/DDD-0.1.0-macos-universal.zip` and `dist/SHA256SUMS.txt`. Install the packaged app manually as above.
+Packaging produces `dist/DDD-0.1.1-macos-universal.zip` and `dist/SHA256SUMS.txt`. Install the packaged app manually as above.
 
 ## First-launch permissions and settings
 
@@ -65,6 +65,7 @@ A trackpad or mouse without a middle-button event can use the picker but has no 
 
 | Control | Effect |
 | --- | --- |
+| Hover over the floating D | Show all linked jobs after a short delay; scroll for long lists and click a row to reopen it |
 | Drag the floating D | Move it; closes an open picker |
 | Click the floating D | Open or close the picker |
 | Click an app bubble | Show follow-ups/windows or activate the sole window directly |
@@ -87,6 +88,10 @@ Follow-ups retain creation order. Their displayed numbers are positions, not sta
 DDD reads accessibility information to capture a URL, window title, label, or selected item when an app exposes it. Browser tabs are matched by title prefixes; if a match is missing, opening the saved URL can create a new tab. Selected native-app items are matched by text. Some supported app URLs can become deep links, including Slack, Claude, and Notion; some Messages titles can become `imessage://` links. These are implementation heuristics, not a compatibility guarantee.
 
 There is no exact session snapshot, reliable scroll-position restore, or automatic completion tracking. Changed titles, duplicate names, unavailable accessibility trees, signed-out apps, and changed URL handlers can return to the wrong place or fail. DDD may activate an app or its first available window as a fallback.
+
+### Hover list of all linked jobs
+
+Rest the pointer over D for about 0.3 seconds. A non-activating list shows every saved follow-up in number order, with its app name and job label. Long lists scroll rather than truncating. This includes saved follow-ups without a currently visible line. Move into the list to click a job; move away to dismiss it. Clicking or dragging D closes the hover list and keeps the existing picker/drag behavior. An empty list says “No linked jobs.”
 
 ### Lines and colors
 

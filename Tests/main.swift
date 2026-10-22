@@ -41,5 +41,54 @@ expect(!panel.canBecomeKey && !panel.isOpaque, "Non-activating transparent D pan
 let radial = RadialView(frame: safe, hub: NSPoint(x: 720, y: 450), safe: safe, apps: [])
 expect(radial.acceptsFirstResponder, "Native radial view accepts Escape key handling")
 expect(radial.bubbleCenters.isEmpty, "Empty app list creates no phantom bubbles")
+let jobs = (1...60).map { i in
+    FollowUp(bundleID: "com.example.app", appName: "Example", label: "Job \(i)", windowTitle: "Window", url: nil, selection: nil)
+}
+let jobList = JobsListView(items: jobs, width: 420, maxHeight: 350)
+expect(jobList.buttons.count == 60, "Hover list includes every job without truncation")
+expect(jobList.buttons.first?.title == "1. Example\nJob 1", "Hover row contains number, app and job label")
+expect(jobList.buttons.last?.title == "60. Example\nJob 60", "Last linked job remains reachable")
+expect(jobList.scrollView.documentView!.frame.height > jobList.scrollView.frame.height, "Long hover list scrolls")
+expect(jobList.frame.height <= 350, "Hover list respects available screen height")
+var openedID: UUID?
+jobList.onOpen = { openedID = $0.id }
+jobList.buttons.last?.performClick(nil)
+expect(openedID == jobs.last?.id, "Clicking hover row opens the correct job")
+let emptyList = JobsListView(items: [], width: 420, maxHeight: 350)
+expect(emptyList.buttons.isEmpty && emptyList.heading.stringValue == "No linked jobs", "Empty hover state is explicit")
+var hoverEvents: [Bool] = []
+panel.dView.onHoverChanged = { hoverEvents.append($0) }
+panel.dView.updateTrackingAreas()
+expect(!panel.dView.trackingAreas.isEmpty, "D tracks pointer entry and exit")
+let enter = NSEvent.enterExitEvent(with: .mouseEntered, location: .zero, modifierFlags: [], timestamp: 0,
+                                  windowNumber: 0, context: nil, eventNumber: 0, trackingNumber: 0, userData: nil)!
+panel.dView.mouseEntered(with: enter)
+panel.dView.mouseExited(with: enter)
+expect(hoverEvents == [true, false], "D hover signals entry and exit")
+let hoverController = JobsHoverController()
+panel.setFrameOrigin(NSPoint(x: 180, y: 180))
+panel.orderFrontRegardless()
+hoverController.hover(true, anchor: panel.dView, items: jobs)
+RunLoop.current.run(until: Date().addingTimeInterval(0.4))
+expect(hoverController.isVisible, "Hover opens a real non-activating panel after delay")
+hoverController.close()
+expect(!hoverController.isVisible, "Closing hover panel cancels and hides it")
+hoverController.hover(true, anchor: panel.dView, items: jobs)
+hoverController.close()
+RunLoop.current.run(until: Date().addingTimeInterval(0.4))
+expect(!hoverController.isVisible, "Click/drag cancellation prevents delayed reopening")
+if CommandLine.arguments.contains("--preview") {
+    let window = NSWindow(contentRect: jobList.frame, styleMask: [.titled], backing: .buffered, defer: false)
+    window.contentView = jobList
+    jobList.wantsLayer = true
+    jobList.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+    window.display()
+    if let image = jobList.bitmapImageRepForCachingDisplay(in: jobList.bounds) {
+        jobList.cacheDisplay(in: jobList.bounds, to: image)
+        try image.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: "build/hover-preview.png"))
+        print("Rendered synthetic hover preview: build/hover-preview.png")
+    }
+    window.orderOut(nil)
+}
 panel.orderOut(nil)
 print("All core and native UI construction checks passed. No DDD preferences or follow-up store accessed.")

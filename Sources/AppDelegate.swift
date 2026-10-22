@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let defaults = UserDefaults.standard
     private let middleClick = MiddleClickMonitor()
     private let links = LinksOverlay()
+    private let jobsHover = JobsHoverController()
 
     private var isOn: Bool {
         get { defaults.object(forKey: "isOn") as? Bool ?? true }
@@ -36,7 +37,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         dPanel.dView.onClick = { [weak self] in self?.toggleOverlay() }
-        dPanel.dView.onDragBegan = { [weak self] in self?.closeOverlay() }
+        dPanel.dView.onDragBegan = { [weak self] in
+            self?.jobsHover.close()
+            self?.closeOverlay()
+        }
+        dPanel.dView.onHoverChanged = { [weak self] inside in
+            guard let self, self.isOn, self.overlay == nil else { return }
+            self.jobsHover.hover(inside, anchor: self.dPanel.dView, items: FollowUpStore.shared.items)
+        }
+        jobsHover.onOpen = { [weak self] item in
+            self?.closeOverlay()
+            FollowUpOpener.open(item)
+        }
         dPanel.dView.onMoved = { [weak self] origin in
             self?.defaults.set(NSStringFromPoint(origin), forKey: "dOrigin")
         }
@@ -93,12 +105,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func followUpsChanged() {
         let count = FollowUpStore.shared.items.count
         dPanel.dView.count = count
+        jobsHover.update(items: FollowUpStore.shared.items)
         statusItem.button?.title = count > 0 ? " \(count)" : ""
         statusItem.button?.imagePosition = .imageLeft
         links.refresh()
     }
 
     @objc private func dMoved() {
+        jobsHover.close()
         links.redraw()
     }
 
@@ -160,6 +174,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             links.start()
             dPanel.orderFrontRegardless() // keep the D above the lines
         } else {
+            jobsHover.close()
             closeOverlay()
             links.stop()
             dPanel.orderOut(nil)
@@ -178,6 +193,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// A display was unplugged or rearranged: bring the D back if it is no longer on any screen.
     @objc private func screensChanged() {
+        jobsHover.close()
         links.rebuildPanels()
         if isOn { dPanel.orderFrontRegardless() }
         guard !NSScreen.screens.contains(where: { $0.frame.intersects(dPanel.frame) }) else { return }
@@ -188,6 +204,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: Rays overlay
 
     private func toggleOverlay() {
+        jobsHover.close()
         overlay == nil ? showOverlay() : closeOverlay()
     }
 
