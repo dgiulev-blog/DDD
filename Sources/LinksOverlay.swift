@@ -212,21 +212,19 @@ private func linkColor(needsInput: Bool) -> NSColor {
 }
 
 private final class LinesView: NSView {
-    /// Line segments in global Cocoa coordinates; green while their app needs input.
+    /// Line segments in global Cocoa coordinates; always drawn blue (only the rings change color).
     var lines: [(from: NSPoint, to: NSPoint, needsInput: Bool)] = [] { didSet { needsDisplay = true } }
 
     override func draw(_ dirtyRect: NSRect) {
         guard let o = window?.frame.origin, !lines.isEmpty else { return }
-        for needsInput in [false, true] {
-            linkColor(needsInput: needsInput).withAlphaComponent(0.85).set()
-            let path = NSBezierPath()
-            path.lineWidth = 1.2
-            for (a, b, n) in lines where n == needsInput {
-                path.move(to: NSPoint(x: a.x - o.x, y: a.y - o.y))
-                path.line(to: NSPoint(x: b.x - o.x, y: b.y - o.y))
-            }
-            path.stroke()
+        NSColor(calibratedRed: 0.20, green: 0.50, blue: 0.95, alpha: 0.85).set()
+        let path = NSBezierPath()
+        path.lineWidth = 1.2
+        for (a, b, _) in lines {
+            path.move(to: NSPoint(x: a.x - o.x, y: a.y - o.y))
+            path.line(to: NSPoint(x: b.x - o.x, y: b.y - o.y))
         }
+        path.stroke()
     }
 }
 
